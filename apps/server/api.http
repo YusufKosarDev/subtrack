@@ -1,0 +1,55 @@
+### 1. Health check - Server çalışıyor mu?
+GET http://localhost:3000/health
+
+### 2. Tüm kullanıcıları listele (henüz boş olmalı)
+GET http://localhost:3000/api/users
+
+### 3. İLK KULLANICIYI OLUŞTUR! 🎯
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "yusuf@subtrack.dev",
+  "password": "supersecret123",
+  "name": "Yusuf Koşar"
+}
+
+### 4. Tekrar listele (artık 1 kullanıcı var)
+GET http://localhost:3000/api/users
+
+### 5. Aynı email'le tekrar oluşturmayı dene (409 Conflict bekliyoruz)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "yusuf@subtrack.dev",
+  "password": "anothertry",
+  "name": "Yusuf 2"
+}
+
+### 6. Şifre olmadan dene (400 Bad Request bekliyoruz)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+### 7. Çok kısa şifre dene (400 Bad Request bekliyoruz)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "short@example.com",
+  "password": "123"
+}
+
+### 8. İkinci geçerli kullanıcı oluştur
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "demo@subtrack.dev",
+  "password": "demopassword123",
+  "name": "Demo User"
+}
