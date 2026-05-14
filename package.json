@@ -1,0 +1,34 @@
+{
+  "name": "subtrack",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Subscription and recurring expense tracker — never lose track of your monthly costs again.",
+  "license": "MIT",
+  "author": "Yusuf Koşar",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "echo 'Will be configured when client and server are ready'",
+    "build": "echo 'Will be configured when client and server are ready'",
+    "lint": "echo 'Will be configured when ESLint is installed'",
+    "format": "echo 'Will be configured when Prettier is installed'",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "subscription-tracker",
+    "expense-management",
+    "react",
+    "typescript",
+    "express",
+    "prisma",
+    "postgresql"
+  ]
+}
