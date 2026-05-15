@@ -53,3 +53,124 @@ Content-Type: application/json
   "password": "demopassword123",
   "name": "Demo User"
 }
+
+### TEST 9: Email formatı yanlış (Zod yakalamalı)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "validpass123"
+}
+
+### TEST 10: Boşluklu/büyük harfli email (Zod normalize etmeli)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "   YUSUF.TEST@EXAMPLE.COM   ",
+  "password": "validpass123",
+  "name": "Test User"
+}
+
+### TEST 11: Birden fazla validation hatası (hepsi tek seferde dönmeli)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "invalid",
+  "password": "ab"
+}
+
+### TEST 12: Çok uzun email (255 karakter limiti)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+  "password": "validpass123"
+}
+
+### TEST 13: Olmayan endpoint (404 testi - yeni format)
+GET http://localhost:3000/api/nonexistent
+
+### TEST 14: AppError fırlatma testi (duplicate email - 409)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "email": "yusuf@subtrack.dev",
+  "password": "newpassword123",
+  "name": "Different Name"
+}
+
+### TEST 15: GET tek kullanıcı (henüz endpoint yok - 404)
+GET http://localhost:3000/api/users/some-id
+
+### TEST 16: Sağlık kontrolü (200 - error handler etkilenmemeli)
+GET http://localhost:3000/health
+
+### ========================================
+### AUTH TESTS
+### ========================================
+
+### A1: Yeni kullanıcı kayıt (register)
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "yusuf-jwt@subtrack.dev",
+  "password": "supersecret123",
+  "name": "Auth Test User"
+}
+
+### A2: Login (başarılı)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "yusuf-jwt@subtrack.dev",
+  "password": "supersecret123"
+}
+
+### A3: Login (yanlış şifre - 401 bekliyoruz)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "yusuf-jwt@subtrack.dev",
+  "password": "wrongpassword"
+}
+
+### A4: Login (olmayan email - aynı 401 hatası bekliyoruz)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@subtrack.dev",
+  "password": "anything"
+}
+
+### A5: Protected endpoint - token YOK (401 bekliyoruz)
+GET http://localhost:3000/api/users
+
+### A6: Protected endpoint - YANLIŞ token (401 bekliyoruz)
+GET http://localhost:3000/api/users
+Authorization: Bearer fake.invalid.token
+
+### A7: Get current user - token YOK (401 bekliyoruz)
+GET http://localhost:3000/api/auth/me
+
+### ========================================
+### TOKEN ile TEST
+### ========================================
+### ÖNCE A1 veya A2'yi çalıştır, "token" alanını kopyala.
+### Aşağıdaki testlerde "BURAYA_TOKEN_YAPISTIR" yerine yapıştır.
+
+### A8: Protected endpoint - GEÇERLİ token
+GET http://localhost:3000/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMDNmNzQyOS1lY2NhLTQwZTgtYTg5ZC00NDM2YTQ2OGFmMjMiLCJlbWFpbCI6Inl1c3VmLWp3dEBzdWJ0cmFjay5kZXYiLCJpYXQiOjE3Nzg4MzY2NzMsImV4cCI6MTc3OTQ0MTQ3MywiaXNzIjoic3VidHJhY2stYXBpIn0.rr6gk4coKsFESHSeiuqmoECRDeGg-Tgg1ReVY0AV6tw
+
+### A9: Get current user - GEÇERLİ token
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMDNmNzQyOS1lY2NhLTQwZTgtYTg5ZC00NDM2YTQ2OGFmMjMiLCJlbWFpbCI6Inl1c3VmLWp3dEBzdWJ0cmFjay5kZXYiLCJpYXQiOjE3Nzg4MzY2NzMsImV4cCI6MTc3OTQ0MTQ3MywiaXNzIjoic3VidHJhY2stYXBpIn0.rr6gk4coKsFESHSeiuqmoECRDeGg-Tgg1ReVY0AV6tw

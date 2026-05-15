@@ -1,16 +1,17 @@
 import { Router } from 'express';
-import { createUser, getAllUsers } from '../controllers/user.controller.js';
+import { getAllUsers } from '../controllers/user.controller.js';
+import { requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
 /**
- * User Routes
+ * User Routes (Protected)
  *
- * POST   /api/users  → Create new user
- * GET    /api/users  → List all users
+ * GET    /api/users  → List all users (requires authentication)
+ *
+ * Note: Registration moved to POST /api/auth/register
  */
 
-router.post('/', createUser);
-router.get('/', getAllUsers);
+router.get('/', requireAuth, getAllUsers);
 
 export default router;
