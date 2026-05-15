@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from '../errors/app-error.js';
+import { logger } from '../lib/logger.js';
 
 /**
  * Centralized error handling middleware.
@@ -86,12 +87,18 @@ export function errorHandler(
   // -----------------------------------------------
   // 4. Unknown / unexpected errors
   // -----------------------------------------------
-  console.error('[ERROR]', {
-    method: req.method,
-    path: req.path,
-    error: err.message,
-    stack: isDevelopment ? err.stack : undefined,
-  });
+  logger.error(
+    {
+      method: req.method,
+      path: req.path,
+      err: {
+        name: err.name,
+        message: err.message,
+        stack: isDevelopment ? err.stack : undefined,
+      },
+    },
+    'Unhandled error in request',
+  );
 
   res.status(500).json({
     error: isDevelopment ? err.message : 'Internal server error',

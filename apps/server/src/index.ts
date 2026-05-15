@@ -4,8 +4,9 @@ import express, { type Express, type Request, type Response } from 'express';
 import helmet from 'helmet';
 
 import { env } from './config/env.js';
-
+import { logger } from './lib/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
+import { requestLogger } from './middlewares/logger.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 
@@ -18,6 +19,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger); // HTTP request logging (auto-logs every request)
 
 // =====================================
 // ROUTES
@@ -60,9 +62,16 @@ app.use(errorHandler);
 // START SERVER
 // =====================================
 app.listen(env.PORT, () => {
-  console.log(`🚀 SubTrack API is running on http://localhost:${env.PORT}`);
-  console.log(`🌍 Environment: ${env.NODE_ENV}`);
-  console.log(`❤️  Health check: http://localhost:${env.PORT}/health`);
-  console.log(`🔐 Auth API:      http://localhost:${env.PORT}/api/auth`);
-  console.log(`👥 Users API:     http://localhost:${env.PORT}/api/users`);
+  logger.info(
+    {
+      port: env.PORT,
+      environment: env.NODE_ENV,
+      endpoints: {
+        health: `http://localhost:${env.PORT}/health`,
+        auth: `http://localhost:${env.PORT}/api/auth`,
+        users: `http://localhost:${env.PORT}/api/users`,
+      },
+    },
+    `🚀 SubTrack API started on port ${env.PORT}`,
+  );
 });
