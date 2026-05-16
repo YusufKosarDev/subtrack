@@ -174,3 +174,153 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMDNmN
 ### A9: Get current user - GEÇERLİ token
 GET http://localhost:3000/api/auth/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMDNmNzQyOS1lY2NhLTQwZTgtYTg5ZC00NDM2YTQ2OGFmMjMiLCJlbWFpbCI6Inl1c3VmLWp3dEBzdWJ0cmFjay5kZXYiLCJpYXQiOjE3Nzg4MzY2NzMsImV4cCI6MTc3OTQ0MTQ3MywiaXNzIjoic3VidHJhY2stYXBpIn0.rr6gk4coKsFESHSeiuqmoECRDeGg-Tgg1ReVY0AV6tw
+
+### ========================================
+### SUBSCRIPTION TESTS
+### ========================================
+### Önce A2 (Login) çalıştır, "token" alanını kopyala.
+### Aşağıdaki @authToken değişkenine yapıştır.
+
+@authToken = BURAYA_TOKEN_YAPISTIR
+
+### S1: Login (token al)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "yusuf-jwt@subtrack.dev",
+  "password": "supersecret123"
+}
+
+### S2: Aboneliklerimi listele (boş olmalı)
+GET http://localhost:3000/api/subscriptions
+Authorization: Bearer {{authToken}}
+
+### S3: Yeni Netflix aboneliği oluştur
+POST http://localhost:3000/api/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Netflix",
+  "price": 99.99,
+  "currency": "TRY",
+  "billingCycle": "MONTHLY",
+  "category": "Entertainment",
+  "startDate": "2026-01-01",
+  "nextPaymentDate": "2026-06-01",
+  "notes": "Premium plan, 4K"
+}
+
+### S4: Spotify aboneliği oluştur
+POST http://localhost:3000/api/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Spotify",
+  "price": 59.99,
+  "currency": "TRY",
+  "billingCycle": "MONTHLY",
+  "category": "Music",
+  "startDate": "2026-02-15",
+  "nextPaymentDate": "2026-05-20"
+}
+
+### S5: Tüm aboneliklerimi listele (artık 2 tane var)
+GET http://localhost:3000/api/subscriptions
+Authorization: Bearer {{authToken}}
+
+### S6: Yaklaşan ödemeler (varsayılan 7 gün)
+GET http://localhost:3000/api/subscriptions/upcoming
+Authorization: Bearer {{authToken}}
+
+### S7: Yaklaşan ödemeler (30 gün)
+GET http://localhost:3000/api/subscriptions/upcoming?days=30
+Authorization: Bearer {{authToken}}
+
+### S8: Tek bir abonelik detayı (önce S3'ün cevabından id'yi kopyala)
+### S3'ün response'undan subscription.id alanını @subId değişkenine yapıştır
+@subId = BURAYA_ABONELIK_ID_YAPISTIR
+
+GET http://localhost:3000/api/subscriptions/{{subId}}
+Authorization: Bearer {{authToken}}
+
+### S9: Aboneliği güncelle (fiyat artışı)
+PUT http://localhost:3000/api/subscriptions/{{subId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "price": 119.99,
+  "notes": "Premium plan, 4K - Fiyat zammı sonrası"
+}
+
+### S10: Aboneliği pasifleştir (iptal etmeden)
+PUT http://localhost:3000/api/subscriptions/{{subId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "isActive": false
+}
+
+### ========================================
+### HATA / GÜVENLİK TESTLERİ
+### ========================================
+
+### S11: Token olmadan dene (401 bekliyoruz)
+GET http://localhost:3000/api/subscriptions
+
+### S12: Geçersiz fiyat (negatif, 400 bekliyoruz)
+POST http://localhost:3000/api/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Invalid Sub",
+  "price": -50,
+  "startDate": "2026-01-01",
+  "nextPaymentDate": "2026-06-01"
+}
+
+### S13: Geçmiş tarih ile next payment (400 bekliyoruz)
+POST http://localhost:3000/api/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Time Travel",
+  "price": 10,
+  "startDate": "2020-01-01",
+  "nextPaymentDate": "2020-06-01"
+}
+
+### S14: Geçersiz UUID (400 bekliyoruz)
+GET http://localhost:3000/api/subscriptions/not-a-uuid
+Authorization: Bearer {{authToken}}
+
+### S15: Var olmayan ID (404 bekliyoruz)
+GET http://localhost:3000/api/subscriptions/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{authToken}}
+
+### S16: Trial olarak işaretle ama trialEndsAt verme (400 bekliyoruz)
+POST http://localhost:3000/api/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Disney+ Free Trial",
+  "price": 0,
+  "startDate": "2026-05-01",
+  "nextPaymentDate": "2026-06-01",
+  "isTrial": true
+}
+
+### S17: Aboneliği sil
+DELETE http://localhost:3000/api/subscriptions/{{subId}}
+Authorization: Bearer {{authToken}}
+
+### S18: Silinen aboneliği tekrar GET (404 bekliyoruz)
+GET http://localhost:3000/api/subscriptions/{{subId}}
+Authorization: Bearer {{authToken}}

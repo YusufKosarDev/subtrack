@@ -8,6 +8,7 @@ import { logger } from './lib/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { requestLogger } from './middlewares/logger.middleware.js';
 import authRoutes from './routes/auth.routes.js';
+import subscriptionRoutes from './routes/subscription.routes.js';
 import userRoutes from './routes/user.routes.js';
 
 const app: Express = express();
@@ -44,6 +45,7 @@ app.get('/', (_req: Request, res: Response) => {
       health: '/health',
       auth: '/api/auth',
       users: '/api/users',
+      subscriptions: '/api/subscriptions',
     },
   });
 });
@@ -51,6 +53,7 @@ app.get('/', (_req: Request, res: Response) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // =====================================
 // ERROR HANDLING (must be last!)
@@ -70,6 +73,7 @@ app.listen(env.PORT, () => {
         health: `http://localhost:${env.PORT}/health`,
         auth: `http://localhost:${env.PORT}/api/auth`,
         users: `http://localhost:${env.PORT}/api/users`,
+        subscriptions: `http://localhost:${env.PORT}/api/subscriptions`,
       },
     },
     `🚀 SubTrack API started on port ${env.PORT}`,

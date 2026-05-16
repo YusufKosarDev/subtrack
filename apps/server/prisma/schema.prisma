@@ -11,6 +11,20 @@ datasource db {
 }
 
 // ============================================
+// ENUMS
+// ============================================
+
+enum BillingCycle {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  CUSTOM
+
+  @@map("billing_cycle")
+}
+
+// ============================================
 // MODELS
 // ============================================
 
@@ -22,5 +36,45 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // Relations
+  subscriptions Subscription[]
+
   @@map("users")
+}
+
+model Subscription {
+  id              String       @id @default(uuid())
+
+  // Owner
+  userId          String       @map("user_id")
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Core info
+  name            String
+  price           Decimal      @db.Decimal(12, 2)
+  currency        String       @default("TRY") @db.VarChar(3)
+  billingCycle    BillingCycle @default(MONTHLY) @map("billing_cycle")
+  category        String?
+
+  // Dates
+  startDate       DateTime     @map("start_date")
+  nextPaymentDate DateTime     @map("next_payment_date")
+
+  // Status flags
+  isActive        Boolean      @default(true) @map("is_active")
+  isTrial         Boolean      @default(false) @map("is_trial")
+  trialEndsAt     DateTime?    @map("trial_ends_at")
+
+  // Optional
+  notes           String?
+
+  // Timestamps
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  // Indexes for performance
+  @@index([userId])
+  @@index([userId, isActive])
+  @@index([nextPaymentDate])
+  @@map("subscriptions")
 }
