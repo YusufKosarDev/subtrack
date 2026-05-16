@@ -45,3 +45,10 @@ prisma/migrations/dev/
 
 # Docker
 .docker/
+# AI assistant / editor configs
+CLAUDE.md
+.claude/
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
+dev.log
