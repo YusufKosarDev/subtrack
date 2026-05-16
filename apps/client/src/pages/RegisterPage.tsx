@@ -3,30 +3,31 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GradientBackground } from "@/components/shared/gradient-background";
 import { GlassCard } from "@/components/shared/glass-card";
 import { BrandLogo } from "@/components/shared/brand-logo";
-import { loginSchema, type LoginInput } from "@/features/auth/schemas";
-import { useLogin } from "@/features/auth/use-auth";
+import { registerSchema, type RegisterInput } from "@/features/auth/schemas";
+import { useRegister } from "@/features/auth/use-auth";
 
-export function LoginPage() {
+export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const login = useLogin();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const registerMutation = useRegister();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
-  const onSubmit = (data: LoginInput) => login.mutate(data);
+  const onSubmit = (data: RegisterInput) => registerMutation.mutate(data);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4">
@@ -43,13 +44,39 @@ export function LoginPage() {
           </div>
 
           <h1 className="text-center text-2xl font-semibold tracking-tight">
-            Welcome back
+            Create your account
           </h1>
           <p className="mt-2 mb-6 text-center text-sm text-muted-foreground">
-            Sign in to your account to continue
+            Get started with SubTrack in seconds
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+            <div className="space-y-2">
+              <Label htmlFor="name">
+                Name{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </Label>
+              <div className="relative">
+                <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Yusuf"
+                  className="pl-9"
+                  aria-invalid={!!errors.name}
+                  {...register("name")}
+                />
+              </div>
+              {errors.name && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -78,8 +105,8 @@ export function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
                   className="pl-9 pr-10"
                   aria-invalid={!!errors.password}
                   {...register("password")}
@@ -107,30 +134,63 @@ export function LoginPage() {
               )}
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type={showConfirm ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="Repeat password"
+                  className="pl-9 pr-10"
+                  aria-invalid={!!errors.confirmPassword}
+                  {...register("confirmPassword")}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                  aria-pressed={showConfirm}
+                >
+                  {showConfirm ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
             <Button
               type="submit"
               size="lg"
               className="w-full"
-              disabled={login.isPending}
+              disabled={registerMutation.isPending}
             >
-              {login.isPending ? (
+              {registerMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing in...
+                  Creating account...
                 </>
               ) : (
-                "Sign in"
+                "Create account"
               )}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link
-              to="/register"
-              className="font-medium text-primary hover:underline"
-            >
-              Sign up
+            Already have an account?{" "}
+            <Link to="/login" className="font-medium text-primary hover:underline">
+              Sign in
             </Link>
           </p>
         </GlassCard>
