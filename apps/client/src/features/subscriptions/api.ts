@@ -22,6 +22,51 @@ export interface SubscriptionMutationResponse {
   subscription: Subscription;
 }
 
+function serializeCreate(input: CreateSubscriptionInput): Record<string, unknown> {
+  return {
+    name: input.name,
+    price: input.price,
+    currency: input.currency,
+    billingCycle: input.billingCycle,
+    category: input.category && input.category.length > 0 ? input.category : undefined,
+    startDate: input.startDate.toISOString(),
+    nextPaymentDate: input.nextPaymentDate.toISOString(),
+    isTrial: input.isTrial,
+    trialEndsAt: input.trialEndsAt
+      ? input.trialEndsAt.toISOString()
+      : undefined,
+    notes: input.notes && input.notes.length > 0 ? input.notes : undefined,
+  };
+}
+
+function serializeUpdate(input: UpdateSubscriptionInput): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+  if (input.name !== undefined) payload.name = input.name;
+  if (input.price !== undefined) payload.price = input.price;
+  if (input.currency !== undefined) payload.currency = input.currency;
+  if (input.billingCycle !== undefined) payload.billingCycle = input.billingCycle;
+  if (input.category !== undefined) {
+    payload.category = input.category && input.category.length > 0 ? input.category : null;
+  }
+  if (input.startDate !== undefined) {
+    payload.startDate = input.startDate?.toISOString();
+  }
+  if (input.nextPaymentDate !== undefined) {
+    payload.nextPaymentDate = input.nextPaymentDate?.toISOString();
+  }
+  if (input.isTrial !== undefined) payload.isTrial = input.isTrial;
+  if (input.trialEndsAt !== undefined) {
+    payload.trialEndsAt = input.trialEndsAt
+      ? input.trialEndsAt.toISOString()
+      : null;
+  }
+  if (input.notes !== undefined) {
+    payload.notes = input.notes && input.notes.length > 0 ? input.notes : null;
+  }
+  if (input.isActive !== undefined) payload.isActive = input.isActive;
+  return payload;
+}
+
 export async function listSubscriptions(): Promise<SubscriptionListResponse> {
   const { data } = await api.get<SubscriptionListResponse>("/subscriptions");
   return data;
@@ -47,7 +92,7 @@ export async function createSubscription(
 ): Promise<SubscriptionMutationResponse> {
   const { data } = await api.post<SubscriptionMutationResponse>(
     "/subscriptions",
-    input
+    serializeCreate(input)
   );
   return data;
 }
@@ -58,7 +103,7 @@ export async function updateSubscription(
 ): Promise<SubscriptionMutationResponse> {
   const { data } = await api.put<SubscriptionMutationResponse>(
     `/subscriptions/${id}`,
-    input
+    serializeUpdate(input)
   );
   return data;
 }

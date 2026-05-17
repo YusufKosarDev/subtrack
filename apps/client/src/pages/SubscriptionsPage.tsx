@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { AlertCircle, CreditCard, Plus } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -12,25 +11,30 @@ import {
   type StatusFilter,
 } from "@/features/subscriptions/components/subscription-filters";
 import { DeleteSubscriptionDialog } from "@/features/subscriptions/components/delete-subscription-dialog";
+import { SubscriptionDialog } from "@/features/subscriptions/components/subscription-dialog";
 import {
   useDeleteSubscription,
   useSubscriptions,
+  useUpdateSubscription,
 } from "@/features/subscriptions/queries";
 import type { Subscription } from "@/types/subscription";
 
 export function SubscriptionsPage() {
   const subscriptionsQuery = useSubscriptions();
   const deleteMutation = useDeleteSubscription();
+  const updateMutation = useUpdateSubscription();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [cycleFilter, setCycleFilter] = useState<CycleFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
+  const [editingSubscription, setEditingSubscription] =
+    useState<Subscription | null>(null);
   const [toDelete, setToDelete] = useState<Subscription | null>(null);
 
   const subscriptions = subscriptionsQuery.data?.subscriptions ?? [];
-
-  const hasFilters =
-    !!searchQuery || cycleFilter !== "all" || statusFilter !== "all";
 
   const filtered = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -54,6 +58,25 @@ export function SubscriptionsPage() {
     setStatusFilter("all");
   };
 
+  const handleAdd = () => {
+    setDialogMode("create");
+    setEditingSubscription(null);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (sub: Subscription) => {
+    setDialogMode("edit");
+    setEditingSubscription(sub);
+    setDialogOpen(true);
+  };
+
+  const handleToggle = (sub: Subscription) => {
+    updateMutation.mutate({
+      id: sub.id,
+      input: { isActive: !sub.isActive },
+    });
+  };
+
   const handleConfirmDelete = () => {
     if (!toDelete) return;
     deleteMutation.mutate(toDelete.id, {
@@ -70,7 +93,7 @@ export function SubscriptionsPage() {
             Manage your recurring expenses in one place.
           </p>
         </div>
-        <Button size="lg" disabled>
+        <Button size="lg" onClick={handleAdd}>
           <Plus className="h-4 w-4" />
           Add subscription
         </Button>
@@ -103,7 +126,7 @@ export function SubscriptionsPage() {
           title="No subscriptions yet"
           description="Track Netflix, Spotify, cloud storage and more. Add your first subscription to get started."
           action={
-            <Button disabled>
+            <Button onClick={handleAdd}>
               <Plus className="h-4 w-4" />
               Add your first subscription
             </Button>
@@ -123,11 +146,18 @@ export function SubscriptionsPage() {
       ) : (
         <SubscriptionTable
           subscriptions={filtered}
-          onEdit={() => toast.info("Editing comes in the next sprint")}
-          onToggle={() => toast.info("Toggling comes in the next sprint")}
+          onEdit={handleEdit}
+          onToggle={handleToggle}
           onDelete={setToDelete}
         />
       )}
+
+      <SubscriptionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        mode={dialogMode}
+        initialData={editingSubscription}
+      />
 
       <DeleteSubscriptionDialog
         subscription={toDelete}
