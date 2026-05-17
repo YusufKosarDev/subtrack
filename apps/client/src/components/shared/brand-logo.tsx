@@ -24,10 +24,15 @@ export function BrandLogo({
 }: BrandLogoProps) {
   const s = sizeMap[size];
   return (
-    <div className={cn("inline-flex items-center gap-2.5", className)}>
+    <div
+      className={cn(
+        "group inline-flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.03]",
+        className
+      )}
+    >
       <div
         className={cn(
-          "flex items-center justify-center bg-gradient-to-br from-primary to-primary/60 font-bold text-primary-foreground shadow-lg shadow-primary/20",
+          "flex items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/60 font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/30",
           s.square,
           s.radius
         )}

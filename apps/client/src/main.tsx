@@ -20,7 +20,18 @@ createRoot(document.getElementById("root")!).render(
           disableTransitionOnChange
         >
           <App />
-          <Toaster richColors position="top-right" />
+          <Toaster
+            richColors
+            closeButton
+            position="top-right"
+            expand
+            toastOptions={{
+              duration: 4000,
+              classNames: {
+                toast: "bg-card border-border",
+              },
+            }}
+          />
         </ThemeProvider>
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/store/auth.store";
 import { useLogout } from "@/features/auth/use-auth";
+import { PageTransition } from "@/components/shared/page-transition";
 
 function DisabledHint({ children }: { children: React.ReactNode }) {
   return (
@@ -30,13 +31,14 @@ export function SettingsPage() {
   const logout = useLogout();
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your profile, preferences and account.
-        </p>
-      </header>
+    <PageTransition>
+      <div className="space-y-6">
+        <header>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage your profile, preferences and account.
+          </p>
+        </header>
 
       <Card className="space-y-4 p-6">
         <div>
@@ -124,6 +126,7 @@ export function SettingsPage() {
           </Button>
         </div>
       </Card>
-    </div>
+      </div>
+    </PageTransition>
   );
 }

@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { MoreHorizontal, Pencil, Power, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,12 +65,23 @@ export function SubscriptionTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {subscriptions.map((sub) => {
+            <AnimatePresence initial={false}>
+            {subscriptions.map((sub, index) => {
               const days = getDaysUntil(sub.nextPaymentDate);
               return (
-                <TableRow
+                <motion.tr
                   key={sub.id}
-                  className="transition-colors hover:bg-muted/50"
+                  data-slot="table-row"
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{
+                    duration: 0.2,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: Math.min(index * 0.03, 0.3),
+                  }}
+                  className="border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted"
                 >
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -145,9 +157,10 @@ export function SubscriptionTable({
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                </TableRow>
+                </motion.tr>
               );
             })}
+            </AnimatePresence>
           </TableBody>
         </Table>
       </div>

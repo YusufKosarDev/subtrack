@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageTransition } from "@/components/shared/page-transition";
 import { SpendingOverviewChart } from "@/features/dashboard/components/spending-overview-chart";
 import { CategoryBreakdownChart } from "@/features/dashboard/components/category-breakdown-chart";
 import { useDashboardData } from "@/features/dashboard/use-dashboard-data";
@@ -59,62 +60,68 @@ export function AnalyticsPage() {
 
   if (isError) {
     return (
-      <div className="space-y-6">
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Insights into your subscriptions.
-          </p>
-        </header>
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Failed to load analytics</AlertTitle>
-          <AlertDescription>
-            Something went wrong while loading your data.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <PageTransition>
+        <div className="space-y-6">
+          <header>
+            <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Insights into your subscriptions.
+            </p>
+          </header>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Failed to load analytics</AlertTitle>
+            <AlertDescription>
+              Something went wrong while loading your data.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </PageTransition>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Insights into your subscriptions.
-          </p>
-        </header>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <PageTransition>
+        <div className="space-y-6">
+          <header>
+            <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Insights into your subscriptions.
+            </p>
+          </header>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Skeleton className="h-[400px]" />
+            <Skeleton className="h-[400px]" />
+          </div>
           <Skeleton className="h-[400px]" />
-          <Skeleton className="h-[400px]" />
         </div>
-        <Skeleton className="h-[400px]" />
-      </div>
+      </PageTransition>
     );
   }
 
   if (data.activeCount === 0) {
     return (
-      <div className="space-y-6">
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Insights into your subscriptions.
-          </p>
-        </header>
-        <EmptyState
-          icon={Sparkles}
-          title="No data to analyze yet"
-          description="Add a few active subscriptions to see spending insights, category breakdowns and trends."
-        />
-      </div>
+      <PageTransition>
+        <div className="space-y-6">
+          <header>
+            <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Insights into your subscriptions.
+            </p>
+          </header>
+          <EmptyState
+            icon={Sparkles}
+            title="No data to analyze yet"
+            description="Add a few active subscriptions to see spending insights, category breakdowns and trends."
+          />
+        </div>
+      </PageTransition>
     );
   }
 
@@ -129,15 +136,16 @@ export function AnalyticsPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Insights into your subscriptions.
-        </p>
-      </header>
+    <PageTransition>
+      <div className="space-y-6">
+        <header>
+          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Insights into your subscriptions.
+          </p>
+        </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           title="Annual Spend"
           value={formatCurrency(data.yearlyTotal, data.primaryCurrency)}
@@ -256,6 +264,7 @@ export function AnalyticsPage() {
           />
         </div>
       </Card>
-    </div>
+      </div>
+    </PageTransition>
   );
 }
