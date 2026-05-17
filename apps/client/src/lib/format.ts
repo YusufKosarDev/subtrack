@@ -23,6 +23,23 @@ export function formatCurrency(
   }
 }
 
+export function formatCurrencyCompact(
+  amount: number,
+  currency: string
+): string {
+  if (!Number.isFinite(amount)) return `0 ${currency.toUpperCase()}`;
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency.toUpperCase(),
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(0)} ${currency.toUpperCase()}`;
+  }
+}
+
 export type DateFormatMode = "short" | "long" | "relative";
 
 export function formatDate(
