@@ -6,6 +6,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { SubscriptionsPage } from "@/pages/SubscriptionsPage";
+import { SubscriptionDetailPage } from "@/pages/SubscriptionDetailPage";
 import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -54,6 +55,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <SubscriptionsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/subscriptions/:id"
+        element={
+          <ProtectedRoute>
+            <SubscriptionDetailPage />
           </ProtectedRoute>
         }
       />

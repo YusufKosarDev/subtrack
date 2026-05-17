@@ -12,6 +12,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import { useLogout } from "@/features/auth/use-auth";
 import { PageTransition } from "@/components/shared/page-transition";
+import { PageHeader } from "@/components/layout/page-header";
 
 function DisabledHint({ children }: { children: React.ReactNode }) {
   return (
@@ -33,12 +34,10 @@ export function SettingsPage() {
   return (
     <PageTransition>
       <div className="space-y-6">
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your profile, preferences and account.
-          </p>
-        </header>
+        <PageHeader
+          title="Settings"
+          description="Manage your profile, preferences and account."
+        />
 
       <Card className="space-y-4 p-6">
         <div>

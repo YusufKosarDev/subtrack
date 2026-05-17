@@ -73,10 +73,12 @@ export function CategoryBreakdownChart({
           data={entries}
           dataKey="total"
           nameKey="category"
-          innerRadius={60}
-          outerRadius={100}
-          paddingAngle={2}
+          innerRadius={75}
+          outerRadius={130}
+          paddingAngle={3}
           strokeWidth={2}
+          animationBegin={50}
+          animationDuration={600}
         >
           {entries.map((entry) => (
             <Cell key={entry.category} fill={entry.fill} />
@@ -100,8 +102,8 @@ export function CategoryBreakdownChart({
                   >
                     <tspan
                       x={cx}
-                      y={cy - 6}
-                      className="fill-foreground text-lg font-bold tabular-nums"
+                      y={cy - 8}
+                      className="fill-foreground text-xl font-bold tabular-nums"
                     >
                       {formatCurrency(total, currency)}
                     </tspan>

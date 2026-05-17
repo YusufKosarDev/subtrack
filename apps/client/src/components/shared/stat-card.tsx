@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface StatCardTrend {
@@ -42,28 +41,38 @@ export function StatCard({
   const TrendIcon = trend ? TREND_ICON[trend.direction] : null;
   return (
     <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
     >
-      <Card
+      <div
         className={cn(
-          "p-6 transition-shadow duration-300 hover:shadow-lg",
+          "shimmer-on-hover group relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-card to-card/60 p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-glow-primary",
           className
         )}
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-primary/15 opacity-40 blur-3xl transition-opacity duration-500 group-hover:opacity-70"
+        />
+
+        <div className="mb-4 flex items-start justify-between">
           <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-          <Icon className="h-4 w-4 text-muted-foreground" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/10">
+            <Icon className="h-4 w-4 text-primary" />
+          </div>
         </div>
-        <p className="text-2xl font-bold tracking-tight tabular-nums">{value}</p>
+
+        <p className="text-3xl font-bold tracking-tight tabular-nums">{value}</p>
+
         {subtitle && (
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         )}
+
         {trend && TrendIcon && (
           <div className="mt-3 flex items-center gap-1.5">
             <span
               className={cn(
-                "inline-flex items-center gap-0.5 text-xs font-medium tabular-nums",
+                "inline-flex items-center gap-0.5 rounded-md bg-card/60 px-1.5 py-0.5 text-xs font-medium tabular-nums",
                 TREND_COLOR[trend.direction]
               )}
             >
@@ -74,7 +83,7 @@ export function StatCard({
             <span className="text-xs text-muted-foreground">{trend.label}</span>
           </div>
         )}
-      </Card>
+      </div>
     </motion.div>
   );
 }

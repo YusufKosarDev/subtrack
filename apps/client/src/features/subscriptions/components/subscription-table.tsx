@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { MoreHorizontal, Pencil, Power, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -33,6 +35,9 @@ interface SubscriptionTableProps {
   onEdit?: (subscription: Subscription) => void;
   onDelete?: (subscription: Subscription) => void;
   onToggle?: (subscription: Subscription) => void;
+  selectedIds?: Set<string>;
+  onToggleSelected?: (id: string) => void;
+  onToggleAll?: (checked: boolean) => void;
 }
 
 function getDueClass(days: number): string {
@@ -46,13 +51,41 @@ export function SubscriptionTable({
   onEdit,
   onDelete,
   onToggle,
+  selectedIds,
+  onToggleSelected,
+  onToggleAll,
 }: SubscriptionTableProps) {
+  const selectable = !!selectedIds && !!onToggleSelected;
+  const allSelected =
+    selectable &&
+    subscriptions.length > 0 &&
+    subscriptions.every((s) => selectedIds!.has(s.id));
+  const someSelected =
+    selectable &&
+    !allSelected &&
+    subscriptions.some((s) => selectedIds!.has(s.id));
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border/40 bg-card/40 backdrop-blur-xl">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
+              {selectable && (
+                <TableHead className="w-10 pl-4">
+                  <Checkbox
+                    checked={
+                      allSelected
+                        ? true
+                        : someSelected
+                          ? "indeterminate"
+                          : false
+                    }
+                    onCheckedChange={(value) => onToggleAll?.(value === true)}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+              )}
               <TableHead>Name</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Cycle</TableHead>
@@ -66,100 +99,116 @@ export function SubscriptionTable({
           </TableHeader>
           <TableBody>
             <AnimatePresence initial={false}>
-            {subscriptions.map((sub, index) => {
-              const days = getDaysUntil(sub.nextPaymentDate);
-              return (
-                <motion.tr
-                  key={sub.id}
-                  data-slot="table-row"
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{
-                    duration: 0.2,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: Math.min(index * 0.03, 0.3),
-                  }}
-                  className="border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted"
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{sub.name}</span>
-                      {sub.isTrial && (
-                        <Badge
-                          variant="outline"
-                          className="px-1.5 py-0 text-[10px] font-medium"
+              {subscriptions.map((sub, index) => {
+                const days = getDaysUntil(sub.nextPaymentDate);
+                const isSelected = selectable && selectedIds!.has(sub.id);
+                return (
+                  <motion.tr
+                    key={sub.id}
+                    data-slot="table-row"
+                    data-state={isSelected ? "selected" : undefined}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{
+                      duration: 0.2,
+                      ease: [0.16, 1, 0.3, 1],
+                      delay: Math.min(index * 0.03, 0.3),
+                    }}
+                    className="border-b transition-colors hover:bg-muted/40 data-[state=selected]:bg-primary/5"
+                  >
+                    {selectable && (
+                      <TableCell className="pl-4">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => onToggleSelected?.(sub.id)}
+                          aria-label={`Select ${sub.name}`}
+                        />
+                      </TableCell>
+                    )}
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/subscriptions/${sub.id}`}
+                          className="font-medium hover:text-primary hover:underline"
                         >
-                          Trial
+                          {sub.name}
+                        </Link>
+                        {sub.isTrial && (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500/40 px-1.5 py-0 text-[10px] font-medium text-amber-500"
+                          >
+                            Trial
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {formatCurrency(sub.price, sub.currency)}
+                    </TableCell>
+                    <TableCell>
+                      <BillingCycleBadge cycle={sub.billingCycle} />
+                    </TableCell>
+                    <TableCell>
+                      <CategoryBadge category={sub.category} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm">
+                          {formatDate(sub.nextPaymentDate, "short")}
+                        </span>
+                        <span className={cn("text-xs", getDueClass(days))}>
+                          {formatRelativeDate(sub.nextPaymentDate)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {sub.isActive ? (
+                        <Badge variant="default" className="px-2 py-0.5 text-xs">
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="px-2 py-0.5 text-xs">
+                          Inactive
                         </Badge>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="tabular-nums">
-                    {formatCurrency(sub.price, sub.currency)}
-                  </TableCell>
-                  <TableCell>
-                    <BillingCycleBadge cycle={sub.billingCycle} />
-                  </TableCell>
-                  <TableCell>
-                    <CategoryBadge category={sub.category} />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm">
-                        {formatDate(sub.nextPaymentDate, "short")}
-                      </span>
-                      <span className={cn("text-xs", getDueClass(days))}>
-                        {formatRelativeDate(sub.nextPaymentDate)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {sub.isActive ? (
-                      <Badge variant="default" className="px-2 py-0.5 text-xs">
-                        Active
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="px-2 py-0.5 text-xs">
-                        Inactive
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Actions for ${sub.name}`}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem onClick={() => onEdit?.(sub)}>
-                          <Pencil className="h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onToggle?.(sub)}>
-                          <Power className="h-4 w-4" />
-                          {sub.isActive ? "Deactivate" : "Activate"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onDelete?.(sub)}
-                          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </motion.tr>
-              );
-            })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`Actions for ${sub.name}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem onClick={() => onEdit?.(sub)}>
+                            <Pencil className="h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onToggle?.(sub)}>
+                            <Power className="h-4 w-4" />
+                            {sub.isActive ? "Deactivate" : "Activate"}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => onDelete?.(sub)}
+                            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </motion.tr>
+                );
+              })}
             </AnimatePresence>
           </TableBody>
         </Table>

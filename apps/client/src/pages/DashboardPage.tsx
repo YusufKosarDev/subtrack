@@ -15,25 +15,19 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/shared/stat-card";
 import { PageTransition } from "@/components/shared/page-transition";
+import { PageHeader } from "@/components/layout/page-header";
 import { useDashboardData } from "@/features/dashboard/use-dashboard-data";
 import { SpendingOverviewChart } from "@/features/dashboard/components/spending-overview-chart";
 import { CategoryBreakdownChart } from "@/features/dashboard/components/category-breakdown-chart";
 import { UpcomingPaymentsList } from "@/features/dashboard/components/upcoming-payments-list";
+import { RecentActivity } from "@/features/dashboard/components/recent-activity";
+import { SavingsInsights } from "@/features/dashboard/components/savings-insights";
 import { useAuthStore } from "@/store/auth.store";
 import { useCommandPaletteStore } from "@/store/command-palette.store";
 import { formatCurrency } from "@/lib/format";
 
 function StatCardSkeleton() {
-  return (
-    <Card className="p-6">
-      <div className="mb-3 flex items-center justify-between">
-        <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-4 w-4 rounded" />
-      </div>
-      <Skeleton className="h-7 w-24" />
-      <Skeleton className="mt-2 h-3 w-32" />
-    </Card>
-  );
+  return <Skeleton className="h-[148px] rounded-2xl" />;
 }
 
 function ChartCardSkeleton({ className }: { className?: string }) {
@@ -65,10 +59,7 @@ export function DashboardPage() {
     return (
       <PageTransition>
         <div className="space-y-6">
-          <header>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{greeting}</p>
-          </header>
+          <PageHeader title="Dashboard" description={greeting} />
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Failed to load dashboard</AlertTitle>
@@ -84,12 +75,19 @@ export function DashboardPage() {
   return (
     <PageTransition>
       <div className="space-y-6">
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {greeting} Here&apos;s an overview of your subscriptions.
-          </p>
-        </header>
+        <PageHeader
+          title="Dashboard"
+          description={`${greeting} Here's an overview of your subscriptions.`}
+          actions={
+            <Button
+              onClick={() => setAddSubscriptionOpen(true)}
+              className="shadow-lg shadow-primary/20 transition-shadow hover:shadow-primary/30"
+            >
+              <Plus className="h-4 w-4" />
+              Add subscription
+            </Button>
+          }
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {isLoading ? (
@@ -188,7 +186,7 @@ export function DashboardPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card>
             <div className="p-6 pb-2">
               <h2 className="text-base font-semibold tracking-tight">
@@ -212,39 +210,82 @@ export function DashboardPage() {
           </Card>
 
           <Card>
-            <div className="p-6 pb-2">
+            <div className="p-6 pb-3">
               <h2 className="text-base font-semibold tracking-tight">
-                Quick Actions
+                Recent Activity
               </h2>
-              <p className="text-sm text-muted-foreground">
-                Common things you might want to do
-              </p>
+              <p className="text-sm text-muted-foreground">Last changes</p>
             </div>
-            <div className="flex flex-col gap-2 p-6 pt-2">
-              <Button
-                onClick={() => setAddSubscriptionOpen(true)}
-                className="shadow-lg shadow-primary/20 transition-shadow hover:shadow-primary/30"
-              >
-                <Plus className="h-4 w-4" />
-                Add subscription
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/subscriptions">
-                  <CreditCard className="h-4 w-4" />
-                  View all subscriptions
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/analytics">
-                  <LineChart className="h-4 w-4" />
-                  View analytics
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+            <div className="px-6 pb-6">
+              {isLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
+                </div>
+              ) : (
+                <RecentActivity subscriptions={data.subscriptions} />
+              )}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="p-6 pb-3">
+              <h2 className="text-base font-semibold tracking-tight">
+                Savings Insights
+              </h2>
+              <p className="text-sm text-muted-foreground">Where money goes</p>
+            </div>
+            <div className="px-6 pb-6">
+              {isLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-14 w-full" />
+                  ))}
+                </div>
+              ) : (
+                <SavingsInsights
+                  subscriptions={data.subscriptions}
+                  currency={data.primaryCurrency}
+                />
+              )}
             </div>
           </Card>
         </div>
+
+        <Card>
+          <div className="p-6 pb-2">
+            <h2 className="text-base font-semibold tracking-tight">
+              Quick Actions
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Common things you might want to do
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-2 p-6 pt-2 sm:grid-cols-3">
+            <Button
+              onClick={() => setAddSubscriptionOpen(true)}
+              className="shadow-lg shadow-primary/20 transition-shadow hover:shadow-primary/30"
+            >
+              <Plus className="h-4 w-4" />
+              Add subscription
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/subscriptions">
+                <CreditCard className="h-4 w-4" />
+                View subscriptions
+                <ArrowRight className="ml-auto h-4 w-4" />
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/analytics">
+                <LineChart className="h-4 w-4" />
+                View analytics
+                <ArrowRight className="ml-auto h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </Card>
       </div>
     </PageTransition>
   );

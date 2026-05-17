@@ -1,4 +1,11 @@
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ReferenceLine,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
@@ -26,12 +33,23 @@ export function SpendingOverviewChart({
   currency,
   className,
 }: SpendingOverviewChartProps) {
+  const average =
+    data.length === 0
+      ? 0
+      : data.reduce((sum, d) => sum + d.total, 0) / data.length;
+
   return (
     <ChartContainer config={chartConfig} className={className}>
       <BarChart
         data={data}
-        margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+        margin={{ top: 16, right: 12, left: 0, bottom: 0 }}
       >
+        <defs>
+          <linearGradient id="spendingBarGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={1} />
+            <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.3} />
+          </linearGradient>
+        </defs>
         <CartesianGrid
           vertical={false}
           strokeDasharray="3 3"
@@ -63,11 +81,27 @@ export function SpendingOverviewChart({
             />
           }
         />
+        {average > 0 && (
+          <ReferenceLine
+            y={average}
+            stroke="var(--primary)"
+            strokeDasharray="4 4"
+            strokeOpacity={0.5}
+            label={{
+              value: `avg ${formatCurrencyCompact(average, currency)}`,
+              position: "insideTopRight",
+              fill: "var(--muted-foreground)",
+              fontSize: 11,
+            }}
+          />
+        )}
         <Bar
           dataKey="total"
-          fill="var(--chart-1)"
+          fill="url(#spendingBarGradient)"
           radius={[8, 8, 0, 0]}
           maxBarSize={64}
+          animationDuration={700}
+          animationBegin={50}
         />
       </BarChart>
     </ChartContainer>

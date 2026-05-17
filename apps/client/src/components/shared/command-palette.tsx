@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import {
   BarChart3,
   CreditCard,
+  Keyboard,
   LayoutDashboard,
   LogOut,
   Monitor,
@@ -30,6 +31,7 @@ export function CommandPalette() {
   const setAddSubscriptionOpen = useCommandPaletteStore(
     (s) => s.setAddSubscriptionOpen
   );
+  const setShortcutsOpen = useCommandPaletteStore((s) => s.setShortcutsOpen);
   const navigate = useNavigate();
   const { setTheme } = useTheme();
   const logout = useLogout();
@@ -88,6 +90,17 @@ export function CommandPalette() {
           <CommandItem onSelect={() => runCommand(() => navigate("/settings"))}>
             <Settings className="h-4 w-4" />
             Settings
+          </CommandItem>
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Help">
+          <CommandItem
+            onSelect={() => runCommand(() => setShortcutsOpen(true))}
+          >
+            <Keyboard className="h-4 w-4" />
+            Keyboard shortcuts
           </CommandItem>
         </CommandGroup>
 
